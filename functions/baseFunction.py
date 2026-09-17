@@ -12,4 +12,3 @@ class Function(ABC):
         
         """
         self.domain = domain
-        self.f_count_comparison: int = 0

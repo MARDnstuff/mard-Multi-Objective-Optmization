@@ -17,27 +17,27 @@ import logging
 setUpLogging()
 logger = logging.getLogger(__name__)
 
+def naive_slow_example() -> None:
+    """
+    Ejemplo de optimización por fuerza fruta
+    """
+    mop1 = MOP1()
+    domain = mop1.get_samples_domain(1000)
+    image = mop1.get_samples_range(domain)
 
-if __name__ == "__main__":
-    logger.info("===== WELCOME MARD =====")
+    plot_points(domain, names=["x"], title="Dominio")
+    plot_points(image, names=["f1", "f2"], title="Imagen")
 
-
-    # mop1 = MOP1()
-    # domain = mop1.get_samples_domain(1000)
-    # image = mop1.get_samples_range(domain)
-
-    # plot_points(domain, names=["x"], title="Dominio")
-    # plot_points(image, names=["f1", "f2"], title="Imagen")
-
-    # inicio = time.perf_counter()
-    # idx = alg.naive_slow_optimization(image)
-    # fin = time.perf_counter()
+    naiveSlow = alg.NaiveSlow(image)
+    inicio = time.perf_counter()
+    idx = naiveSlow.run()
+    fin = time.perf_counter()
     
-    # frente_pareto = image[idx]
-    # conjunto_pareto = domain[idx]
+    frente_pareto = image[idx]
+    conjunto_pareto = domain[idx]
 
-    # plot_points(frente_pareto, names=["f1", "f2"], title="Frente de Pareto")
-    # plot_points(conjunto_pareto, names=["x"], title="Conjunto de Pareto")
+    plot_points(frente_pareto, names=["f1", "f2"], title="Frente de Pareto")
+    plot_points(conjunto_pareto, names=["x"], title="Conjunto de Pareto")
 
 
     # mop2 = MOP2()
@@ -47,8 +47,9 @@ if __name__ == "__main__":
     # plot_points(domain, names=["x1", "x2", "x3"], title="Dominio")
     # plot_points(image, names=["f1", "f2"], title="Imagen")
 
+    # naiveSlow = alg.NaiveSlow(image)
     # inicio = time.perf_counter()
-    # idx = alg.naive_slow_optimization(image)
+    # idx = naiveSlow.run()
     # fin = time.perf_counter()
     
     # frente_pareto = image[idx]
@@ -61,11 +62,12 @@ if __name__ == "__main__":
     # domain = mop3.get_samples_domain(1000)
     # image = mop3.get_samples_range(domain)
 
-    # # plot_points(domain, names=["x", "y"], title="Dominio")
-    # # plot_points(image, names=["f1", "f2"], title="Imagen")
+    # plot_points(domain, names=["x", "y"], title="Dominio")
+    # plot_points(image, names=["f1", "f2"], title="Imagen")
 
+    # naiveSlow = alg.NaiveSlow(image)
     # inicio = time.perf_counter()
-    # idx = alg.naive_slow_optimization(image)
+    # idx = naiveSlow.run()
     # fin = time.perf_counter()
     
     # frente_pareto = image[idx]
@@ -79,11 +81,12 @@ if __name__ == "__main__":
     # domain = mop4.get_samples_domain(1000)
     # image = mop4.get_samples_range(domain)
 
-    # # plot_points(domain, names=["x1", "x2", "x3"], title="Dominio")
-    # # plot_points(image, names=["f1", "f2"], title="Imagen")
+    # plot_points(domain, names=["x1", "x2", "x3"], title="Dominio")
+    # plot_points(image, names=["f1", "f2"], title="Imagen")
 
+    # naiveSlow = alg.NaiveSlow(image)
     # inicio = time.perf_counter()
-    # idx = alg.naive_slow_optimization(image)
+    # idx = naiveSlow.run()
     # fin = time.perf_counter()
     
     # frente_pareto = image[idx]
@@ -96,11 +99,12 @@ if __name__ == "__main__":
     # domain = mop5.get_samples_domain(1000)
     # image = mop5.get_samples_range(domain)
 
-    # # plot_points(domain, names=["x", "y"], title="Dominio")
-    # # plot_points(image, names=["f1", "f2", "f3"], title="Imagen")
+    # plot_points(domain, names=["x", "y"], title="Dominio")
+    # plot_points(image, names=["f1", "f2", "f3"], title="Imagen")
 
+    # naiveSlow = alg.NaiveSlow(image)
     # inicio = time.perf_counter()
-    # idx = alg.naive_slow_optimization(image)
+    # idx = naiveSlow.run()
     # fin = time.perf_counter()
     
     # frente_pareto = image[idx]
@@ -114,11 +118,12 @@ if __name__ == "__main__":
     # domain = mop6.get_samples_domain(1000)
     # image = mop6.get_samples_range(domain)
 
-    # # plot_points(domain, names=["x", "y"], title="Dominio")
-    # # plot_points(image, names=["f1", "f2"], title="Imagen")
+    # plot_points(domain, names=["x", "y"], title="Dominio")
+    # plot_points(image, names=["f1", "f2"], title="Imagen")
 
+    # naiveSlow = alg.NaiveSlow(image)
     # inicio = time.perf_counter()
-    # idx = alg.naive_slow_optimization(image)
+    # idx = naiveSlow.run()
     # fin = time.perf_counter()
     
     # frente_pareto = image[idx]
@@ -127,21 +132,31 @@ if __name__ == "__main__":
     # plot_points(frente_pareto, names=["f1", "f2"], title="Frente de Pareto")
     # plot_points(conjunto_pareto, names=["x", "y"], title="Conjunto de Pareto")
 
-    mop7 = MOP7()
-    domain = mop7.get_samples_domain(1000)
-    image = mop7.get_samples_range(domain)
+    # mop7 = MOP7()
+    # domain = mop7.get_samples_domain(1000)
+    # image = mop7.get_samples_range(domain)
 
     # plot_points(domain, names=["x", "y"], title="Dominio")
     # plot_points(image, names=["f1", "f2", "f3"], title="Imagen")
 
-    inicio = time.perf_counter()
-    idx = alg.naive_slow_optimization(image)
-    fin = time.perf_counter()
+    # naiveSlow = alg.NaiveSlow(image)
+    # inicio = time.perf_counter()
+    # idx = naiveSlow.run()
+    # fin = time.perf_counter()
 
-    frente_pareto = image[idx]
-    conjunto_pareto = domain[idx]
+    # frente_pareto = image[idx]
+    # conjunto_pareto = domain[idx]
 
     # plot_points(frente_pareto, names=["f1", "f2", "f3"], title="Frente de Pareto")
     # plot_points(conjunto_pareto, names=["x", "y"], title="Conjunto de Pareto")
 
-    logger.info(f" Número de comparaciones: {alg.COUNT_COMPARISON} , Tiempo: {fin - inicio:.4f} segundos")
+    logger.info(f" Número de comparaciones: {naiveSlow.f_count_comparison} , Tiempo: {fin - inicio:.4f} segundos")
+
+
+def continuously_updated() -> None:
+    pass
+
+if __name__ == "__main__":
+    logger.info("===== WELCOME MARD =====")
+    # naive_slow_example()
+    continuously_updated()
