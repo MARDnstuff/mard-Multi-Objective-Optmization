@@ -9,6 +9,7 @@ from functions.mop7 import MOP7
 from utils.graphs import plot_points
 import algorithms.naiveSlow as alg
 import algorithms.continuouslyUpdated as alg2
+import algorithms.kungEfficientMethod as alg3
 import time
 import numpy as np
 import logging
@@ -193,4 +194,21 @@ def continuously_updated() -> None:
 if __name__ == "__main__":
     logger.info("===== WELCOME MARD =====")
     # naive_slow_example()
-    continuously_updated()
+    # continuously_updated()
+
+    mop2 = MOP2()
+    domain = mop2.get_samples_domain(1000)
+    image = mop2.get_samples_range(domain)
+
+    kung = alg3.KungEfficientMethod(image)
+    idx = kung.run()
+
+    plot_points(domain, names=["x"], title="Dominio")
+    plot_points(image, names=["f1", "f2"], title="Imagen")
+
+
+    frente_pareto = image[idx]
+    conjunto_pareto = domain[idx]
+
+    plot_points(frente_pareto, names=["f1", "f2"], title="Frente de Pareto")
+    plot_points(conjunto_pareto, names=["x"], title="Conjunto de Pareto")
