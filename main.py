@@ -8,6 +8,7 @@ from functions.mop6 import MOP6
 from functions.mop7 import MOP7
 from utils.graphs import plot_points
 import algorithms.naiveSlow as alg
+import algorithms.continuouslyUpdated as alg2
 import time
 import numpy as np
 import logging
@@ -154,7 +155,40 @@ def naive_slow_example() -> None:
 
 
 def continuously_updated() -> None:
-    pass
+    mop1 = MOP1()
+    domain = mop1.get_samples_domain(1000)
+    image = mop1.get_samples_range(domain)
+
+    plot_points(domain, names=["x"], title="Dominio")
+    plot_points(image, names=["f1", "f2"], title="Imagen")
+
+    naiveSlow = alg2.ContinuouslyUpdated(image)
+    inicio = time.perf_counter()
+    idx = naiveSlow.run()
+    fin = time.perf_counter()
+    
+    frente_pareto = image[idx]
+    conjunto_pareto = domain[idx]
+
+    plot_points(frente_pareto, names=["f1", "f2"], title="Frente de Pareto")
+    plot_points(conjunto_pareto, names=["x"], title="Conjunto de Pareto")
+
+
+    logger.info(f" Número de comparaciones: {naiveSlow.f_count_comparison} , Tiempo: {fin - inicio:.4f} segundos")
+
+    naiveSlow = alg.NaiveSlow(image)
+    inicio = time.perf_counter()
+    idx = naiveSlow.run()
+    fin = time.perf_counter()
+    
+    frente_pareto = image[idx]
+    conjunto_pareto = domain[idx]
+
+    plot_points(frente_pareto, names=["f1", "f2"], title="Frente de Pareto 2")
+    plot_points(conjunto_pareto, names=["x"], title="Conjunto de Pareto 2")
+
+    logger.info(f" Número de comparaciones: {naiveSlow.f_count_comparison} , Tiempo: {fin - inicio:.4f} segundos")
+    
 
 if __name__ == "__main__":
     logger.info("===== WELCOME MARD =====")
