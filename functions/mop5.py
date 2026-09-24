@@ -18,7 +18,7 @@ class MOP5(Function):
         f3(x,y) = 1/(x^2 + y^2 + 1) - 1.1e^(-x^2 - y^2)
 
     Constraints
-        -4 <= x,y <= 1
+        -30 <= x,y <= 30
 
     """
     def __init__(self) -> None:
@@ -26,6 +26,7 @@ class MOP5(Function):
         Constructor
         """
         domain = (-30, 30)
+        self.n = 2
         super().__init__(domain)
 
     def f1(self, x: np.ndarray) -> float:

@@ -24,30 +24,31 @@ class MOP1(Function):
         Constructor
         """
         domain = (-10**5, 10**5)
+        self.n = 1
         super().__init__(domain)
 
-    def f1(self, x: float) -> float:
+    def f1(self, x: np.ndarray) -> float:
         """
         Función objetivo 1 a minimizar
 
-        :param x: valor flotante
+        :param x: arreglo (vector) de variables de decisión
         :return: Valor escalar de la función evaluada en x.
         """
-        if not (x >= self.domain[0] and x <= self.domain[1]):
+        if not (x[0] >= self.domain[0] and x[0] <= self.domain[1]):
             raise ValueError("x value is out of the valid range")
-        
-        return x**2
 
-    def f2(self, x: float) -> float:
+        return x[0]**2
+
+    def f2(self, x: np.ndarray) -> float:
         """
         Función objetivo 2 a minimizar
 
-        :param x: valor flotante
+        :param x: arreglo (vector) de variables de decisión
         :return: Valor escalar de la función evaluada en x.
         """
-        if not (x >= self.domain[0] and x <= self.domain[1]):
+        if not (x[0] >= self.domain[0] and x[0] <= self.domain[1]):
             raise ValueError("x value is out of the valid range")
-        return (x - 2)**2
+        return (x[0] - 2)**2
 
 
     def get_samples_domain(self, n_samples: int) -> np.ndarray:
@@ -59,7 +60,7 @@ class MOP1(Function):
         :return: arreglo de m dimensiones con n_samples
         """
         # El dominio solo es de una dimension 
-        return np.random.uniform(-5, 5, size=(n_samples, 1))
+        return np.random.uniform(-5, 5, size=(n_samples, self.n))
 
     
     def get_samples_range(self, sample_domain: np.ndarray) -> np.ndarray:
@@ -71,4 +72,4 @@ class MOP1(Function):
         """
 
         # Dado que tenemos dos funciones, la dimension de los elementos en el arreglo es de 2
-        return np.array([[self.f1(x[0]), self.f2(x[0])] for x in sample_domain])
+        return np.array([[self.f1(x), self.f2(x)] for x in sample_domain])

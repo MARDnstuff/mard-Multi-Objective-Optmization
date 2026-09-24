@@ -25,6 +25,7 @@ class MOP2(Function):
         Constructor
         """
         domain = (-1, 1)
+        self.n = 3
         super().__init__(domain)
 
     def f1(self, x: np.ndarray) -> float:
