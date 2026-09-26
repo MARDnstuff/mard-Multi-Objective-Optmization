@@ -15,7 +15,18 @@ class KungEfficientMethod(OpAlgorithm):
 
     def front(self, idx: np.ndarray) -> np.ndarray:
         """
-        TBD
+        Calcula el frente de Pareto (conjunto de índices no dominados) 
+        sobre el subconjunto de soluciones indicado por ``idx``, usando 
+        una estrategia recursiva de divide y vencerás (variante del 
+        Kung Efficient Method).
+
+        El algoritmo divide el conjunto de índices en dos mitades, 
+        calcula recursivamente el frente de Pareto de cada mitad y 
+        luego fusiona ambos resultados descartando las soluciones de la 
+        mitad inferior que son dominadas por alguna solución de la mitad 
+        superior. Las soluciones de la mitad superior ya están libres de 
+        dominancia interna por construcción recursiva, por lo que no es 
+        necesario re-evaluarlas contra la mitad inferior.
         """
         if len(idx) == 1:
             return idx

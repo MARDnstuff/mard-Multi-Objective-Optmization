@@ -211,87 +211,100 @@ def kung() -> None:
 
 if __name__ == "__main__":
 
-    problem_name = "MOP5"
-    problem = MOP5()
-    # myvar = problem.labels_var()
-    myvar = ["x", "y"]
-    myfoo = ["f1", "f2", "f3"]
+    mop1 = MOP1()
+    domain = mop1.get_samples_domain(10)
+    image = mop1.get_samples_range(domain)
 
-    res = {
-        problem_name: [],
-    }
-
-    logger.info(f"===== {problem_name} =====")
-
-    domain = problem.get_samples_domain(1000)
-    image = problem.get_samples_range(domain)
-
-    naiveSlow1 = alg.NaiveSlow(image)
-    inicio = time.perf_counter()
-    idx = naiveSlow1.run()
-    fin = time.perf_counter()
-
+    naiveSlow = alg.NaiveSlow(image)
+    idx = naiveSlow.run()
+    
     frente_pareto = image[idx]
     conjunto_pareto = domain[idx]
 
-    plot_points(domain, names=myvar, title="Dominio", save_path=f"IMG/Tarea02/{problem_name}_Dominio.png", show=False)
-    plot_points(image, names=myfoo, title="Imagen", save_path=f"IMG/Tarea02/{problem_name}_Imagen.png", show=False)
-    plot_points(frente_pareto, names=myfoo, title="Frente de Pareto", save_path=f"IMG/Tarea02/{problem_name}_FrenteDePareto_NaiveAndSlow.png", show=False, z_ideal=problem.z_ideal, z_nadir=problem.z_nadir)
-    plot_points(conjunto_pareto, names=myvar, title="Conjunto de Pareto", save_path=f"IMG/Tarea02/{problem_name}_ConjuntoDePareto_NaiveAndSlow.png", show=False)
+    print(frente_pareto)
+    print(conjunto_pareto)
 
-    res[problem_name].append({
-        "Algoritmo": "Naive and Slow", 
-        "Tiempo": fin - inicio, 
-        "No. Comparaciones": naiveSlow1.f_count_comparison,
-        "Cardinalidad Frente": len(frente_pareto)
-    }) 
+    # problem_name = "MOP5"
+    # problem = MOP5()
+    # # myvar = problem.labels_var()
+    # myvar = ["x", "y"]
+    # myfoo = ["f1", "f2", "f3"]
 
-    contUpdated1 = alg2.ContinuouslyUpdated(image)
-    inicio = time.perf_counter()
-    idx = contUpdated1.run()
-    fin = time.perf_counter()
+    # res = {
+    #     problem_name: [],
+    # }
 
-    frente_pareto = image[idx]
-    conjunto_pareto = domain[idx]
+    # logger.info(f"===== {problem_name} =====")
 
-    plot_points(frente_pareto, names=myfoo, title="Frente de Pareto", save_path=f"IMG/Tarea02/{problem_name}_FrenteDePareto_ContinuouslyUpdated.png", show=False, z_ideal=problem.z_ideal, z_nadir=problem.z_nadir)
-    plot_points(conjunto_pareto, names=myvar, title="Conjunto de Pareto", save_path=f"IMG/Tarea02/{problem_name}_ConjuntoDePareto_ContinuouslyUpdated.png", show=False)
+    # domain = problem.get_samples_domain(1000)
+    # image = problem.get_samples_range(domain)
+
+    # naiveSlow1 = alg.NaiveSlow(image)
+    # inicio = time.perf_counter()
+    # idx = naiveSlow1.run()
+    # fin = time.perf_counter()
+
+    # frente_pareto = image[idx]
+    # conjunto_pareto = domain[idx]
+
+    # plot_points(domain, names=myvar, title="Dominio", save_path=f"IMG/Tarea02/{problem_name}_Dominio.png", show=False)
+    # plot_points(image, names=myfoo, title="Imagen", save_path=f"IMG/Tarea02/{problem_name}_Imagen.png", show=False)
+    # plot_points(frente_pareto, names=myfoo, title="Frente de Pareto", save_path=f"IMG/Tarea02/{problem_name}_FrenteDePareto_NaiveAndSlow.png", show=False, z_ideal=problem.z_ideal, z_nadir=problem.z_nadir)
+    # plot_points(conjunto_pareto, names=myvar, title="Conjunto de Pareto", save_path=f"IMG/Tarea02/{problem_name}_ConjuntoDePareto_NaiveAndSlow.png", show=False)
+
+    # res[problem_name].append({
+    #     "Algoritmo": "Naive and Slow", 
+    #     "Tiempo": fin - inicio, 
+    #     "No. Comparaciones": naiveSlow1.f_count_comparison,
+    #     "Cardinalidad Frente": len(frente_pareto)
+    # }) 
+
+    # contUpdated1 = alg2.ContinuouslyUpdated(image)
+    # inicio = time.perf_counter()
+    # idx = contUpdated1.run()
+    # fin = time.perf_counter()
+
+    # frente_pareto = image[idx]
+    # conjunto_pareto = domain[idx]
+
+    # plot_points(frente_pareto, names=myfoo, title="Frente de Pareto", save_path=f"IMG/Tarea02/{problem_name}_FrenteDePareto_ContinuouslyUpdated.png", show=False, z_ideal=problem.z_ideal, z_nadir=problem.z_nadir)
+    # plot_points(conjunto_pareto, names=myvar, title="Conjunto de Pareto", save_path=f"IMG/Tarea02/{problem_name}_ConjuntoDePareto_ContinuouslyUpdated.png", show=False)
 
 
-    res[problem_name].append({
-        "Algoritmo": "Continuously Updated", 
-        "Tiempo": fin - inicio, 
-        "No. Comparaciones": contUpdated1.f_count_comparison,
-        "Cardinalidad Frente": len(frente_pareto)
-    })
+    # res[problem_name].append({
+    #     "Algoritmo": "Continuously Updated", 
+    #     "Tiempo": fin - inicio, 
+    #     "No. Comparaciones": contUpdated1.f_count_comparison,
+    #     "Cardinalidad Frente": len(frente_pareto)
+    # })
 
 
-    kungAlgo = alg3.KungEfficientMethod(image)
-    inicio = time.perf_counter()
-    idx = kungAlgo.run()
-    fin = time.perf_counter()
+    # kungAlgo = alg3.KungEfficientMethod(image)
+    # inicio = time.perf_counter()
+    # idx = kungAlgo.run()
+    # fin = time.perf_counter()
 
-    frente_pareto = image[idx]
-    conjunto_pareto = domain[idx]
+    # frente_pareto = image[idx]
+    # conjunto_pareto = domain[idx]
 
-    plot_points(frente_pareto, names=myfoo, title="Frente de Pareto", save_path=f"IMG/Tarea02/{problem_name}_FrenteDePareto_KungEfficientMethod.png", show=False, z_ideal=problem.z_ideal, z_nadir=problem.z_nadir)
-    plot_points(conjunto_pareto, names=myvar, title="Conjunto de Pareto", save_path=f"IMG/Tarea02/{problem_name}_ConjuntoDePareto_KungEfficientMethod.png", show=False)
+    # plot_points(frente_pareto, names=myfoo, title="Frente de Pareto", save_path=f"IMG/Tarea02/{problem_name}_FrenteDePareto_KungEfficientMethod.png", show=False, z_ideal=problem.z_ideal, z_nadir=problem.z_nadir)
+    # plot_points(conjunto_pareto, names=myvar, title="Conjunto de Pareto", save_path=f"IMG/Tarea02/{problem_name}_ConjuntoDePareto_KungEfficientMethod.png", show=False)
 
 
-    res[problem_name].append({
-        "Algoritmo": "Kung Efficient Method", 
-        "Tiempo": fin - inicio, 
-        "No. Comparaciones": kungAlgo.f_count_comparison,
-        "Cardinalidad Frente": len(frente_pareto)
-    }) 
+    # res[problem_name].append({
+    #     "Algoritmo": "Kung Efficient Method", 
+    #     "Tiempo": fin - inicio, 
+    #     "No. Comparaciones": kungAlgo.f_count_comparison,
+    #     "Cardinalidad Frente": len(frente_pareto)
+    # }) 
 
-    res["z_ideal"] = list(problem.z_ideal)
-    res["z_nadir"] = list(problem.z_nadir)
+    # res["z_ideal"] = list(problem.z_ideal)
+    # res["z_nadir"] = list(problem.z_nadir)
 
-    logger.info(res)
+    # logger.info(res)
 
-    with open(f"results/{problem_name}_resultados.json", "w") as f:
-        json.dump(res, f, indent=4)
+    # with open(f"results/{problem_name}_resultados.json", "w") as f:
+    #     json.dump(res, f, indent=4)
     
 
     
