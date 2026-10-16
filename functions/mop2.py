@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class MOP2(Function):
     """
-    MOP1 
+    MOP2 
 
     Definitions
         F = (f1(x), f2(x)), where

@@ -11,6 +11,7 @@ from utils.graphs import plot_points
 import algorithms.naiveSlow as alg
 import algorithms.continuouslyUpdated as alg2
 import algorithms.kungEfficientMethod as alg3
+from algorithms.epsilonConstraint import EpsilonConstraint
 import time
 import numpy as np
 import json
@@ -212,17 +213,18 @@ def kung() -> None:
 if __name__ == "__main__":
 
     mop1 = MOP1()
-    domain = mop1.get_samples_domain(10)
-    image = mop1.get_samples_range(domain)
 
-    naiveSlow = alg.NaiveSlow(image)
-    idx = naiveSlow.run()
+    epsilonConstring = EpsilonConstraint(fl=mop1.f1, fj=[mop1.f2], bounds=mop1.domain)
+    pts = epsilonConstring.MOP1()
+
+    print(pts)
+    plot_points(pts, names=["f1", "f2"], title="Frente de Pareto")
     
-    frente_pareto = image[idx]
-    conjunto_pareto = domain[idx]
+    # frente_pareto = image[idx]
+    # conjunto_pareto = domain[idx]
 
-    print(frente_pareto)
-    print(conjunto_pareto)
+    # print(frente_pareto)
+    # print(conjunto_pareto)
 
     # problem_name = "MOP5"
     # problem = MOP5()
