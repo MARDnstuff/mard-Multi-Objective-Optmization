@@ -17,7 +17,7 @@ class Function(ABC):
         - Métodos f1, f2, ..., fk: objetivos a minimizar.
     """
 
-    def __init__(self, domain: tuple[float, float]) -> None:
+    def __init__(self, domain: tuple[float, float], ref_pts: bool = True) -> None:
         if not hasattr(self, "n"):
             raise AttributeError(
                 "La subclase debe definir self.n antes de llamar a super().__init__()."
@@ -25,7 +25,9 @@ class Function(ABC):
         self.domain = domain
         self.z_ideal: np.ndarray | None = None
         self.z_nadir: np.ndarray | None = None
-        self.ideal_vector()
+
+        if ref_pts:
+            self.ideal_vector()
 
     def _get_objective_methods(self) -> list:
         objectives = []

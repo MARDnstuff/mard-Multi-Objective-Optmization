@@ -1,11 +1,12 @@
 from typing import Callable
+import random
 from scipy.optimize import minimize
 import numpy as np
 
 
 class EpsilonConstraint():
 
-    def __init__(self, fl: Callable[[np.ndarray], float], fj: list[Callable[[np.ndarray], float]], bounds: tuple[float, float]) -> None:
+    def __init__(self, fl: Callable[[np.ndarray], float], fj: list[Callable[[np.ndarray], float]], bounds: list[tuple[float, float]]) -> None:
         """
         Constructor
         """
@@ -17,8 +18,7 @@ class EpsilonConstraint():
         self.func_bounds = bounds
 
 
-
-    def MOP1(self) -> np.ndarray:
+    def run(self) -> np.ndarray:
         """
         Ejemplo para MOP1
 
@@ -36,14 +36,15 @@ class EpsilonConstraint():
         front = []
 
         # Punto fijo - requisito de scipy
-        x0 = [(0.0)]
+        x0 = np.random.rand(1,10)[0]
 
         # Recorremos epsilon uniformement desde 0 hasta 6 (31 puntos)
-        for eps in np.linspace(0.0, 6.0, 31):     # rango elegido a ojo
+        for eps in np.linspace(0, 10, 100):     # rango elegido a ojo
 
-            r = minimize(self.fl, x0, bounds=[self.func_bounds], method="SLSQP", constraints=[
+            r = minimize(self.fl, x0, bounds=self.func_bounds, method="SLSQP", constraints=[
                 # fj <= ej  ->. fj - ej <= 0
                 {"type": "ineq", "fun": lambda x, e=eps: e - self.fj[0](x)}
+
             ])
 
             # Descarta infactibles / fallos -> que talvez el solver no convergio

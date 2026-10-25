@@ -7,11 +7,13 @@ from functions.mop5 import MOP5
 from functions.mop6 import MOP6
 from functions.mop7 import MOP7
 from functions.zdt1 import ZDT1
+from functions.zdt4 import ZDT4
 from utils.graphs import plot_points
 import algorithms.naiveSlow as alg
 import algorithms.continuouslyUpdated as alg2
 import algorithms.kungEfficientMethod as alg3
 from algorithms.epsilonConstraint import EpsilonConstraint
+from algorithms.weighting import Weighting
 import time
 import numpy as np
 import json
@@ -210,15 +212,43 @@ def kung() -> None:
     plot_points(frente_pareto, names=["f1", "f2"], title="Frente de Pareto")
     plot_points(conjunto_pareto, names=["x"], title="Conjunto de Pareto")
 
-if __name__ == "__main__":
-
-    mop1 = MOP1()
-
-    epsilonConstring = EpsilonConstraint(fl=mop1.f1, fj=[mop1.f2], bounds=mop1.domain)
-    pts = epsilonConstring.MOP1()
-
+def e_constraint_zdt4() -> None:
+    zdt4 = ZDT4()
+    zdt4_bounds = [zdt4.domain] + [zdt4.x_domain] * 9
+    epsilonConst2= EpsilonConstraint(fl=zdt4.f2, fj=[zdt4.f1], bounds=zdt4_bounds)
+    pts = epsilonConst2.run()
     print(pts)
+    plot_points(pts, names=["f2", "f1"], title="Frente de Pareto")
+
+def weighting_zdt4() -> None:
+    zdt4 = ZDT4()
+    zdt4_bounds = [zdt4.x_domain] + [zdt4.domain] * 9
+    weight = Weighting(np.array([zdt4.f1, zdt4.f2]), zdt4_bounds)
+    pts = weight.run()
+    print(len(pts))
     plot_points(pts, names=["f1", "f2"], title="Frente de Pareto")
+
+
+
+if __name__ == "__main__":
+    # e_constraint_zdt4()
+    weighting_zdt4()
+    # mop1 = MOP1()
+
+    # epsilonConstring = EpsilonConstraint(fl=mop1.f1, fj=[mop1.f2], bounds=mop1.domain)
+    # pts = epsilonConstring.run()
+
+    # print(pts)
+    # plot_points(pts, names=["f1", "f2"], title="Frente de Pareto")
+
+
+    # zdt1 = ZDT1()
+
+    # epsilonConst2= EpsilonConstraint(fl=zdt1.f1, fj=[zdt1.f2], bounds=zdt1.domain)
+    # pts = epsilonConst2.run()
+
+    # print(pts)
+    # plot_points(pts, names=["f1", "f2"], title="Frente de Pareto")
     
     # frente_pareto = image[idx]
     # conjunto_pareto = domain[idx]
