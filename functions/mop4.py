@@ -26,8 +26,10 @@ class MOP4(Function):
         """
         Constructor
         """
-        domain = (-1.5, 1.5)
+        domain = (-5, 5)
         self.n = 3
+        self.f1_invok = 0
+        self.f2_invok = 0
         super().__init__(domain)
 
     def f1(self, x: np.ndarray) -> float:
@@ -37,6 +39,7 @@ class MOP4(Function):
         :param x: valor flotante
         :return: Valor escalar de la función evaluada en x.
         """
+        self.f1_invok += 1
         # Aqui espero algo como x = [x1, x2, x3]
         res = 0
         for i in range(0, len(x) - 1):
@@ -52,6 +55,7 @@ class MOP4(Function):
         :param x: valor flotante
         :return: Valor escalar de la función evaluada en x.
         """
+        self.f2_invok += 1
         a = 0.8
         b = 3
         res = 0

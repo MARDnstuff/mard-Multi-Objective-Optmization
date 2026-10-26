@@ -8,12 +8,13 @@ from functions.mop6 import MOP6
 from functions.mop7 import MOP7
 from functions.zdt1 import ZDT1
 from functions.zdt4 import ZDT4
-from utils.graphs import plot_points
+from utils.graphs import plot_points, plot_nbi
 import algorithms.naiveSlow as alg
 import algorithms.continuouslyUpdated as alg2
 import algorithms.kungEfficientMethod as alg3
 from algorithms.epsilonConstraint import EpsilonConstraint
 from algorithms.weighting import Weighting
+from algorithms.normalBoundaryIntersection import NBI
 import time
 import numpy as np
 import json
@@ -212,27 +213,220 @@ def kung() -> None:
     plot_points(frente_pareto, names=["f1", "f2"], title="Frente de Pareto")
     plot_points(conjunto_pareto, names=["x"], title="Conjunto de Pareto")
 
-def e_constraint_zdt4() -> None:
+def e_constraint_zdt4(path: str, show: bool, res: dict) -> None:
     zdt4 = ZDT4()
     zdt4_bounds = [zdt4.domain] + [zdt4.x_domain] * 9
-    epsilonConst2= EpsilonConstraint(fl=zdt4.f2, fj=[zdt4.f1], bounds=zdt4_bounds)
-    pts = epsilonConst2.run()
-    print(pts)
-    plot_points(pts, names=["f2", "f1"], title="Frente de Pareto")
+    epsilonConst2= EpsilonConstraint(fl=zdt4.f2, fj=[zdt4.f1], bounds=zdt4_bounds, n=zdt4.n)
+    inicio = time.perf_counter()
+    F_points = epsilonConst2.run()
+    fin = time.perf_counter()
+    print(F_points)
+    plot_points(F_points, names=["f2", "f1"], title="ZDT4: Frente de Pareto", save_path=path, show=show)
+    res["ZDT4"].append({
+        "Algoritmo": "EpsilonConstraint", 
+        "Tiempo": fin - inicio, 
+        "Invocaciones f1": zdt4.f1_invok,
+        "Invocaciones f2": zdt4.f2_invok,
+        "Cardinalidad Frente": len(F_points)
+    })
+
+def e_constraint_MOP4(path: str, show: bool, res: dict) -> None:
+    mop = MOP4()
+    mop_bounds = [mop.domain] * mop.n
+    epsilonConst= EpsilonConstraint(fl=mop.f2, fj=[mop.f1], bounds=mop_bounds, n=mop.n)
+    inicio = time.perf_counter()
+    F_points = epsilonConst.run()
+    fin = time.perf_counter()
+    print(F_points)
+    plot_points(F_points, names=["f2", "f1"], title="MOP4: Frente de Pareto", save_path=path, show=show)
+    res["MOP4"].append({
+        "Algoritmo": "EpsilonConstraint", 
+        "Tiempo": fin - inicio, 
+        "Invocaciones f1": mop.f1_invok,
+        "Invocaciones f2": mop.f2_invok,
+        "Cardinalidad Frente": len(F_points)
+    })
+
+def e_constraint_MOP1(path: str, show: bool, res: dict) -> None:
+    mop = MOP1()
+    mop_bounds = [mop.domain] * mop.n
+    epsilonConst= EpsilonConstraint(fl=mop.f2, fj=[mop.f1], bounds=mop_bounds, n=mop.n)
+    inicio = time.perf_counter()
+    F_points = epsilonConst.run()
+    fin = time.perf_counter()
+    print(F_points)
+    plot_points(F_points, names=["f2", "f1"], title="MOP1: Frente de Pareto", save_path=path, show=show)
+    
+    res["MOP1"].append({
+        "Algoritmo": "EpsilonConstraint", 
+        "Tiempo": fin - inicio, 
+        "Invocaciones f1": mop.f1_invok,
+        "Invocaciones f2": mop.f2_invok,
+        "Cardinalidad Frente": len(F_points)
+    })
 
 def weighting_zdt4() -> None:
     zdt4 = ZDT4()
     zdt4_bounds = [zdt4.x_domain] + [zdt4.domain] * 9
     weight = Weighting(np.array([zdt4.f1, zdt4.f2]), zdt4_bounds)
+    inicio = time.perf_counter()
     pts = weight.run()
+    fin = time.perf_counter()
     print(len(pts))
     plot_points(pts, names=["f1", "f2"], title="Frente de Pareto")
 
+def NBI_example_MOP1(path: str, show: bool, res: dict) -> None:
+    mop = MOP1()
+
+    nbi = NBI(
+        obj_functions=[mop.f1, mop.f2],
+        test_point=np.array([5.0]),      # un punto, N = 1 variable
+        bounds=[mop.domain] * mop.n,   # un (min, max) por variable
+    )
+
+    inicio = time.perf_counter()
+    pins, X, F_points = nbi.run()
+    fin = time.perf_counter()
+
+    logger.info(f"Pins = \n{pins}")
+    logger.info(f"F_points = \n{F_points}")
+    logger.info(f"X = \n {X}")
+
+    plot_nbi(
+        F_points,
+        anchors=nbi.anchors,
+        shadow_minima=nbi.shadow_minima,
+        direction_rays=nbi.direction_rays,
+        payoff_matrix=nbi.payoff_matrix,
+        betas=pins,
+        front=mop.get_samples_range(np.linspace(0, 2, 200).reshape(-1, 1)),
+        title="NBI - MOP1",
+        save_path=path + "_with_rays",
+        show=show
+    )
+
+    plot_points(F_points, names=["f1","f2"], title="NBI - Frente de Pareto (MOP1)", save_path=path, show=show)
+
+    res["MOP1"].append({
+        "Algoritmo": "NBI", 
+        "Tiempo": fin - inicio, 
+        "Invocaciones f1": mop.f1_invok,
+        "Invocaciones f2": mop.f2_invok,
+        "Cardinalidad Frente": len(F_points)
+    })
+
+def NBI_example_MOP4(path: str, show: bool, res: dict) -> None:
+    mop = MOP4()
+
+    nbi = NBI(
+        obj_functions=[mop.f1, mop.f2],
+        test_point=np.array([5.0, 5.0 , 5.0]),      # un punto, N = 1 variable
+        bounds=[mop.domain] * mop.n,   # un (min, max) por variable
+        p=30
+    )
+
+    inicio = time.perf_counter()
+    pins, X, F_points = nbi.run()
+    fin = time.perf_counter()
+
+    logger.info(f"Pins = \n{pins}")
+    logger.info(f"F_points = \n{F_points}")
+    logger.info(f"X = \n {X}")
+
+    plot_nbi(
+        F_points,
+        anchors=nbi.anchors,
+        shadow_minima=nbi.shadow_minima,
+        direction_rays=nbi.direction_rays,
+        payoff_matrix=nbi.payoff_matrix,
+        betas=pins,
+        front=mop.get_samples_range(np.linspace(0, 2, 200).reshape(-1, 1)),
+        title="NBI - MOP4",
+        save_path=path + "_with_rays",
+        show=show
+    )
+
+    plot_points(F_points, names=["f1","f2"], title="NBI - Frente de Pareto (MOP4)", save_path=path, show=show)
+
+    res["MOP4"].append({
+        "Algoritmo": "NBI", 
+        "Tiempo": fin - inicio, 
+        "Invocaciones f1": mop.f1_invok,
+        "Invocaciones f2": mop.f2_invok,
+        "Cardinalidad Frente": len(F_points)
+    })
+
+def NBI_example_ZDT4(path: str, show: bool, res: dict) -> None:
+    mop = ZDT4()
+
+    zdt4_bounds = [mop.x_domain] + [mop.domain] * 9
+
+    nbi = NBI(
+        obj_functions=[mop.f1, mop.f2],
+        test_point=np.array([5.0]*10),      # un punto, N = 1 variable
+        bounds=zdt4_bounds,   # un (min, max) por variable
+        p=30
+    )
+
+    inicio = time.perf_counter()
+    pins, X, F_points = nbi.run()
+    fin = time.perf_counter()
+
+
+    logger.info(f"Pins = \n{pins}")
+    logger.info(f"F_points = \n{F_points}")
+    logger.info(f"X = \n {X}")
+
+
+    dom = mop.get_samples_domain(200)
+    img = mop.get_samples_range(dom)
+
+    plot_nbi(
+        F_points,
+        anchors=nbi.anchors,
+        shadow_minima=nbi.shadow_minima,
+        direction_rays=nbi.direction_rays,
+        payoff_matrix=nbi.payoff_matrix,
+        betas=pins,
+        front=img,
+        title="NBI - ZDT4",
+        save_path=path + "_with_rays",
+        show=show
+    )
+
+    plot_points(F_points, names=["f1","f2"], title="NBI - Frente de Pareto (ZDT4)", save_path=path, show=show)
+
+    res["ZDT4"].append({
+        "Algoritmo": "NBI", 
+        "Tiempo": fin - inicio, 
+        "Invocaciones f1": mop.f1_invok,
+        "Invocaciones f2": mop.f2_invok,
+        "Cardinalidad Frente": len(F_points)
+    })
 
 
 if __name__ == "__main__":
-    # e_constraint_zdt4()
-    weighting_zdt4()
+    res = {
+        "MOP1": [],
+        "MOP4": [],
+        "ZDT4": [],
+    }
+    show = False
+    prefix = "IMG/Tarea04/"
+    problem = ["MOP1", "MOP4", "ZDT4"]
+    type = ["NBI", "EpsilonConstraint"]
+    NBI_example_MOP1(path=f"{prefix}{type[0]}_{problem[0]}", show=show, res=res)
+    NBI_example_MOP4(path=f"{prefix}{type[0]}_{problem[1]}", show=show, res=res)
+    NBI_example_ZDT4(path=f"{prefix}{type[0]}_{problem[2]}", show=show, res=res)
+    e_constraint_MOP1(path=f"{prefix}{type[1]}_{problem[0]}", show=show, res=res)
+    e_constraint_MOP4(path=f"{prefix}{type[1]}_{problem[1]}", show=show, res=res)
+    e_constraint_zdt4(path=f"{prefix}{type[1]}_{problem[2]}", show=show, res=res)
+
+    with open(f"results/NBI_and_EpsilonConstraint_resultados.json", "w") as f:
+        json.dump(res, f, indent=4)
+    
+    
+    # weighting_zdt4()
     # mop1 = MOP1()
 
     # epsilonConstring = EpsilonConstraint(fl=mop1.f1, fj=[mop1.f2], bounds=mop1.domain)
@@ -338,6 +532,3 @@ if __name__ == "__main__":
     # with open(f"results/{problem_name}_resultados.json", "w") as f:
     #     json.dump(res, f, indent=4)
     
-
-    
-

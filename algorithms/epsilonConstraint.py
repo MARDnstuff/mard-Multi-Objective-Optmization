@@ -6,7 +6,7 @@ import numpy as np
 
 class EpsilonConstraint():
 
-    def __init__(self, fl: Callable[[np.ndarray], float], fj: list[Callable[[np.ndarray], float]], bounds: list[tuple[float, float]]) -> None:
+    def __init__(self, fl: Callable[[np.ndarray], float], fj: list[Callable[[np.ndarray], float]], bounds: list[tuple[float, float]], n: int) -> None:
         """
         Constructor
         """
@@ -16,6 +16,8 @@ class EpsilonConstraint():
         self.fj = fj
         # Dominio
         self.func_bounds = bounds
+
+        self.n = n
 
 
     def run(self) -> np.ndarray:
@@ -36,20 +38,22 @@ class EpsilonConstraint():
         front = []
 
         # Punto fijo - requisito de scipy
-        x0 = np.random.rand(1,10)[0]
+        x0 = np.random.rand(1,self.n)[0]
 
         # Recorremos epsilon uniformement desde 0 hasta 6 (31 puntos)
+        temp = 0
         for eps in np.linspace(0, 10, 100):     # rango elegido a ojo
-
+            temp = eps
             r = minimize(self.fl, x0, bounds=self.func_bounds, method="SLSQP", constraints=[
                 # fj <= ej  ->. fj - ej <= 0
-                {"type": "ineq", "fun": lambda x, e=eps: e - self.fj[0](x)}
+                {"type": "ineq", "fun": lambda x, e=temp: e - self.fj[0](x)}
 
             ])
 
             # Descarta infactibles / fallos -> que talvez el solver no convergio
             if r.success and self.fj[0](r.x) <= eps + 1e-6:   
                 front.append((float(self.fl(r.x)), float(self.fj[0](r.x))))
+            
 
         # quedarse sin duplicados
         return np.unique(np.round(front, 6), axis=0)

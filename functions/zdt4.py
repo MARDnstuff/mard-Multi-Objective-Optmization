@@ -31,6 +31,8 @@ class ZDT4(Function):
         domain = (-5, 5)
         self.x_domain = (0, 1)
         self.n = 10
+        self.f1_invok = 0
+        self.f2_invok = 0
         super().__init__(domain, False)
 
     def labels_var(self) -> list:
@@ -54,6 +56,7 @@ class ZDT4(Function):
         :param x: valor flotante
         :return: Valor escalar de la función evaluada en x.
         """
+        self.f1_invok += 1
         return x[0]
     
 
@@ -64,6 +67,7 @@ class ZDT4(Function):
         :param x: valor flotante
         :return: Valor escalar de la función evaluada en x.
         """
+        self.f2_invok += 1
         return self._g_helper(x) * (1 - np.sqrt(self.f1(x)/self._g_helper(x)))
 
 

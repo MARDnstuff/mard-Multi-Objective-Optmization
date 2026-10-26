@@ -165,6 +165,116 @@ def plot_points(
     return fig
 
 
+def plot_nbi(
+    F_points: np.ndarray,
+    anchors: np.ndarray,
+    shadow_minima: np.ndarray,
+    direction_rays: np.ndarray = None,
+    payoff_matrix: np.ndarray = None,
+    betas: np.ndarray = None,
+    X: np.ndarray = None,
+    front: np.ndarray = None,
+    names=("f1", "f2"),
+    title="Normal-Boundary Intersection",
+    save_path=None,
+    dpi=150,
+    show=True,
+):
+    """
+    Grafica el resultado de NBI para 2 objetivos: el CHIM (línea entre las
+    anclas), los rayos quasi-normales y los puntos NBI encontrados.
+
+    :param F_points: (n_puntos, 2) puntos NBI en el espacio de objetivos
+    :param anchors: (2, 2) anclas, la fila i es F(x_i*)
+    :param shadow_minima: (2,) vector ideal F*
+    :param direction_rays: (2,) dirección quasi-normal n_hat (opcional, dibuja los rayos)
+    :param payoff_matrix: (2, 2) matriz de pagos Phi (necesaria junto con betas)
+    :param betas: (n_puntos, 2) betas usados (necesarios para ubicar los pines)
+    :param front: (m, 2) puntos densos del frente de Pareto real, como referencia (opcional)
+    :param X: (n_puntos, N) soluciones en el espacio de decisión (opcional);
+              si se da, se agrega un segundo panel con el conjunto de Pareto
+    """
+    F_points = np.asarray(F_points)
+    anchors = np.asarray(anchors)
+    shadow_minima = np.asarray(shadow_minima)
+
+    if F_points.shape[1] != 2:
+        raise ValueError("plot_nbi solo soporta 2 objetivos; usa plot_points para n >= 3.")
+
+    if X is None:
+        fig, ax = plt.subplots(figsize=(6.5, 5.5))
+        ax_x = None
+    else:
+        fig, (ax, ax_x) = plt.subplots(1, 2, figsize=(12, 5.5))
+
+    # CHIM: segmento que une las anclas
+    ax.plot(anchors[:, 0], anchors[:, 1], color="gray", linestyle="--", linewidth=1.5,
+            label="CHIM", zorder=2)
+
+    # Pines (Phi·beta + F*) y rayos hacia los puntos NBI
+    if direction_rays is not None and payoff_matrix is not None and betas is not None:
+        pins = (np.asarray(payoff_matrix) @ np.asarray(betas).T).T + shadow_minima
+        ax.scatter(pins[:, 0], pins[:, 1], s=18, color="tab:orange", zorder=3, label="Pines")
+        for pin, fp in zip(pins, F_points):
+            ax.annotate("", xy=fp, xytext=pin,
+                        arrowprops=dict(arrowstyle="->", color="tab:orange", alpha=0.6, lw=0.9),
+                        zorder=2)
+
+    # Frente de Pareto real (referencia)
+    if front is not None:
+        front = np.asarray(front)
+        front = front[np.argsort(front[:, 0])]
+        ax.plot(front[:, 0], front[:, 1], color="black", linewidth=1.2, alpha=0.6,
+                label="Frente de Pareto real", zorder=1)
+
+    # Puntos NBI
+    ax.scatter(F_points[:, 0], F_points[:, 1], s=28, color="tab:blue", edgecolor="black",
+            zorder=4, label="Frente de Pareto (NBI)")
+
+    # Anclas e ideal
+    ax.scatter(anchors[:, 0], anchors[:, 1], marker="s", s=60, color="tab:red",
+            edgecolor="black", zorder=5, label="Anclas")
+    ax.scatter(*shadow_minima, marker="*", s=160, color="green", edgecolor="black",
+            zorder=5, label="Ideal F*")
+
+    ax.set_xlabel(names[0])
+    ax.set_ylabel(names[1])
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=8)
+    ax.set_title("Frente de Pareto")
+
+    # Panel 2: conjunto de Pareto (espacio de decisión)
+    if ax_x is not None:
+        X = np.asarray(X)
+        if X.ndim == 1:
+            X = X.reshape(-1, 1)
+        colores = np.linspace(0, 1, len(X))   # mismo orden que los betas
+        if X.shape[1] == 1:
+            ax_x.scatter(X[:, 0], np.zeros(len(X)), c=colores, cmap="viridis", s=35, edgecolor="black", zorder=3)
+            ax_x.set_yticks([])
+            ax_x.set_xlabel("x")
+        else:
+            ax_x.scatter(X[:, 0], X[:, 1], c=colores, cmap="viridis", s=35, edgecolor="black", zorder=3)
+            ax_x.set_xlabel("x1")
+            ax_x.set_ylabel("x2")
+        ax_x.set_title("Conjunto de Pareto (espacio de decisión)")
+        ax_x.grid(alpha=0.3)
+
+    fig.suptitle(title)
+    plt.tight_layout()
+
+    if save_path is not None:
+        Path(save_path).parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(save_path, dpi=dpi, bbox_inches="tight")
+
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
+
+    return fig
+
+
 # ------------------------------------------------------------------
 # Ejemplo de uso
 # ------------------------------------------------------------------

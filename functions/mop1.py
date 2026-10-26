@@ -25,6 +25,8 @@ class MOP1(Function):
         """
         domain = (-10**5, 10**5)
         self.n = 1
+        self.f1_invok = 0
+        self.f2_invok = 0
         super().__init__(domain)
 
     def f1(self, x: np.ndarray) -> float:
@@ -36,7 +38,7 @@ class MOP1(Function):
         """
         if not (x[0] >= self.domain[0] and x[0] <= self.domain[1]):
             raise ValueError("x value is out of the valid range")
-
+        self.f1_invok += 1
         return x[0]**2
 
     def f2(self, x: np.ndarray) -> float:
@@ -48,6 +50,7 @@ class MOP1(Function):
         """
         if not (x[0] >= self.domain[0] and x[0] <= self.domain[1]):
             raise ValueError("x value is out of the valid range")
+        self.f2_invok += 1
         return (x[0] - 2)**2
 
 
