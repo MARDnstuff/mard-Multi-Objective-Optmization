@@ -388,7 +388,7 @@ def NBI_example_ZDT4(path: str, show: bool, res: dict) -> None:
         direction_rays=nbi.direction_rays,
         payoff_matrix=nbi.payoff_matrix,
         betas=pins,
-        front=img,
+        front=F_points,
         title="NBI - ZDT4",
         save_path=path + "_with_rays",
         show=show

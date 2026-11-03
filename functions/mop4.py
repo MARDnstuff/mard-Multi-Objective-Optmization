@@ -60,7 +60,7 @@ class MOP4(Function):
         b = 3
         res = 0
         for i in range(0, len(x)):
-            fx = abs(x[i])**a + (5*math.sin(x[i]))**b
+            fx = abs(x[i])**a + 5*math.sin(x[i]**b)
             res += fx
         return res
 

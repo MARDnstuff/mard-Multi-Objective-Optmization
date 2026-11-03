@@ -275,6 +275,139 @@ def plot_nbi(
     return fig
 
 
+
+
+"""
+Plot optimizer steps on top of a test function's contour.
+
+Works with any pymoo `Problem` (e.g. the SFU problems in sfu_problems.py) and
+with trajectories from both pymoo and SciPy.
+
+    path_ga = pymoo_path(res)               # res from pymoo minimize(..., save_history=True)
+    rec = ScipyRecorder(x0)                 # pass rec as `callback=` to SciPy
+    plot_steps(problem, {"GA": path_ga, "L-BFGS-B": rec.path})
+
+For problems with more than 2 variables, a 2-D slice is plotted: the two
+variables in `dims` vary, and the rest are fixed (by default at the last
+point of the first trajectory, so the slice passes through that solution).
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+# ---------------------------------------------------------------------------
+# Collecting trajectories
+# ---------------------------------------------------------------------------
+def pymoo_path(res) -> np.ndarray:
+    """Best solution of each generation, shape (n_gen, n_var).
+    Requires minimize(..., save_history=True)."""
+    if not res.history:
+        raise ValueError("res.history is empty: run minimize(..., save_history=True).")
+    return np.array([algo.opt[0].X for algo in res.history])
+
+
+def pymoo_population(res, gen: int) -> np.ndarray:
+    """Whole population of one generation, shape (pop_size, n_var)."""
+    return res.history[gen].pop.get("X")
+
+
+class ScipyRecorder:
+    """SciPy callback that records every iterate.
+
+    Works with minimize (any method that supports callbacks) and with
+    differential_evolution, dual_annealing, etc. via `intermediate_result`.
+    """
+
+    def __init__(self, x0=None):
+        self._path = [] if x0 is None else [np.asarray(x0, dtype=float).copy()]
+
+    def __call__(self, intermediate_result):
+        self._path.append(np.asarray(intermediate_result.x, dtype=float).copy())
+
+    @property
+    def path(self) -> np.ndarray:
+        return np.array(self._path)
+
+
+# ---------------------------------------------------------------------------
+# Plotting
+# ---------------------------------------------------------------------------
+def plot_steps(problem, trajectories: dict, dims=(0, 1), fixed=None,
+            populations: dict = None, minimum=None, n: int = 200,
+            levels: int = 30, title: str = None, ax=None):
+    """Contour of `problem` with optimizer steps drawn on top.
+
+    :param problem:      pymoo Problem (uses problem.xl, problem.xu, problem.evaluate).
+    :param trajectories: {"name": array (n_steps, n_var)}, e.g. from pymoo_path or ScipyRecorder.
+    :param dims:         The two variable indices to plot (only matters if n_var > 2).
+    :param fixed:        Values for the other variables, array (n_var,). Default:
+                        last point of the first trajectory (or domain center).
+    :param populations:  Optional {"label": array (n_points, n_var)} drawn as point clouds.
+    :param minimum:      Optional known optimum, array (n_var,), marked with a red star.
+    :param n:            Grid resolution per axis.
+    :param levels:       Number of contour levels.
+    :param title:        Plot title (default: class name of the problem).
+    :param ax:           Existing matplotlib axis to draw on (optional).
+    :return: (fig, ax)
+    """
+    i, j = dims
+    xl, xu = np.asarray(problem.xl, float), np.asarray(problem.xu, float)
+    n_var = problem.n_var
+
+    # values for the variables that are not plotted
+    if fixed is None:
+        first = next(iter(trajectories.values()), None) if trajectories else None
+        fixed = np.asarray(first[-1], float) if first is not None else (xl + xu) / 2
+    fixed = np.asarray(fixed, float)
+
+    # evaluate the function on the grid (one vectorized call)
+    a = np.linspace(xl[i], xu[i], n)
+    b = np.linspace(xl[j], xu[j], n)
+    A, B = np.meshgrid(a, b)
+    pts = np.tile(fixed, (A.size, 1))
+    pts[:, i], pts[:, j] = A.ravel(), B.ravel()
+    Z = problem.evaluate(pts)[:, 0].reshape(A.shape)
+
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(7, 6))
+    else:
+        fig = ax.figure
+
+    cf = ax.contourf(A, B, Z, levels=levels, cmap="viridis")
+    ax.contour(A, B, Z, levels=levels, colors="white", linewidths=0.3, alpha=0.4)
+    fig.colorbar(cf, ax=ax, label="f(x)")
+
+    for label, P in (populations or {}).items():
+        P = np.asarray(P)
+        ax.scatter(P[:, i], P[:, j], s=18, edgecolors="k", linewidths=0.4, alpha=0.8, zorder=3, label=label)
+
+    colors = plt.cm.tab10.colors
+    for k, (name, T) in enumerate(trajectories.items()):
+        T, c = np.asarray(T), colors[k % 10]
+        ax.plot(T[:, i], T[:, j], "-o", color=c, ms=3, lw=1.5, zorder=4,
+                label=f"{name} ({len(T) - 1} steps)")
+        ax.plot(T[0, i], T[0, j], "s", color=c, ms=9, mec="k", zorder=5)
+        ax.plot(T[-1, i], T[-1, j], "*", color=c, ms=15, mec="k", zorder=5)
+
+    if minimum is not None:
+        m = np.asarray(minimum, float)
+        ax.plot(m[i], m[j], "*", color="red", ms=12, mec="white", zorder=6,
+                label="known minimum")
+
+    ax.set_xlim(xl[i], xu[i])
+    ax.set_ylim(xl[j], xu[j])
+    ax.set_xlabel(f"$x_{{{i + 1}}}$")
+    ax.set_ylabel(f"$x_{{{j + 1}}}$")
+    name = title or type(problem).__name__
+    if n_var > 2:
+        others = [k for k in range(n_var) if k not in (i, j)]
+        name += "  (slice: " + ", ".join(f"$x_{{{k + 1}}}$={fixed[k]:.3g}" for k in others) + ")"
+    ax.set_title(name)
+    if ax.get_legend_handles_labels()[0]:
+        ax.legend(fontsize=8, loc="best")
+    return fig, ax
+
+
 # ------------------------------------------------------------------
 # Ejemplo de uso
 # ------------------------------------------------------------------
@@ -292,3 +425,6 @@ if __name__ == "__main__":
         z_ideal=z_ideal,
         z_nadir=z_nadir,
     )
+
+
+

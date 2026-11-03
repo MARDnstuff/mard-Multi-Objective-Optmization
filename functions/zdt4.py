@@ -36,7 +36,7 @@ class ZDT4(Function):
         super().__init__(domain, False)
 
     def labels_var(self) -> list:
-        labels = [f"x{i}" for i in range(1, self.n)]
+        labels = [f"x{i}" for i in range(1, self.n + 1)]
         return labels
 
 
@@ -68,7 +68,8 @@ class ZDT4(Function):
         :return: Valor escalar de la función evaluada en x.
         """
         self.f2_invok += 1
-        return self._g_helper(x) * (1 - np.sqrt(self.f1(x)/self._g_helper(x)))
+        g = self._g_helper(x)
+        return g * (1 - np.sqrt(self.f1(x)/g))
 
 
     def get_samples_domain(self, n_samples: int) -> list[np.ndarray]:

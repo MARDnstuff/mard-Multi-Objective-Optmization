@@ -125,3 +125,9 @@ def resumen_tabla(df: pd.DataFrame) -> pd.DataFrame:
 
     print("📋 Resumen por método")
     return resumen
+
+def to_scipy(problem):
+    """Turn a pymoo Problem into (f, bounds) for SciPy."""
+    f = lambda x: float(problem.evaluate(np.atleast_2d(x))[0, 0])
+    bounds = list(zip(problem.xl, problem.xu))
+    return f, bounds
